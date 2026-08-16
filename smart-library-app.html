@@ -1,0 +1,2677 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>智慧图书馆探索 - 数字文化空间</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #5B8DEE;
+            --secondary-color: #7C3AED;
+            --accent-green: #10B981;
+            --accent-orange: #F59E0B;
+            --accent-pink: #EC4899;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --card-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* 情绪主题变量 */
+        [data-mood="happy"] {
+            --mood-primary: #F59E0B;
+            --mood-secondary: #FBBF24;
+            --mood-bg: #FFFBEB;
+            --mood-glow: rgba(245, 158, 11, 0.15);
+        }
+        [data-mood="curious"] {
+            --mood-primary: #10B981;
+            --mood-secondary: #34D399;
+            --mood-bg: #ECFDF5;
+            --mood-glow: rgba(16, 185, 129, 0.15);
+        }
+        [data-mood="calm"] {
+            --mood-primary: #3B82F6;
+            --mood-secondary: #60A5FA;
+            --mood-bg: #EFF6FF;
+            --mood-glow: rgba(59, 130, 246, 0.15);
+        }
+        [data-mood="tired"] {
+            --mood-primary: #6B7280;
+            --mood-secondary: #9CA3AF;
+            --mood-bg: #F3F4F6;
+            --mood-glow: rgba(107, 114, 128, 0.1);
+        }
+        [data-mood="nostalgic"] {
+            --mood-primary: #A78BFA;
+            --mood-secondary: #C4B5FD;
+            --mood-bg: #F5F3FF;
+            --mood-glow: rgba(167, 139, 250, 0.15);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            transition: var(--transition-smooth);
+        }
+
+        .app-container {
+            max-width: 430px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: var(--bg-primary);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 60px rgba(0,0,0,0.1);
+        }
+
+        /* 页面容器 */
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: var(--mood-bg, var(--bg-primary));
+        }
+
+        .page.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 10;
+        }
+
+        .page.slide-left {
+            transform: translateX(-100%);
+        }
+        .page.slide-right {
+            transform: translateX(100%);
+        }
+        .page.active.slide-left,
+        .page.active.slide-right {
+            transform: translateX(0);
+        }
+
+        /* ========== 首页 / 数字图书馆入口 ========== */
+        .home-page {
+            background: linear-gradient(180deg, var(--mood-bg, #FEF3C7) 0%, var(--bg-primary) 100%);
+        }
+
+        .home-header {
+            padding: 50px 24px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-area {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .logo-text {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+        }
+
+        .logo-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .mood-selector {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--mood-glow, rgba(91, 141, 238, 0.15));
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: var(--transition-smooth);
+        }
+
+        .welcome-section {
+            padding: 20px 24px 30px;
+        }
+
+        .welcome-title {
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--mood-primary, var(--primary-color)) 0%, var(--mood-secondary, var(--secondary-color)) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .welcome-desc {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* 主题空间入口 */
+        .theme-spaces {
+            padding: 0 24px 100px;
+        }
+
+        .section-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .theme-card {
+            aspect-ratio: 1;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            transform-origin: center;
+        }
+
+        .theme-card:hover {
+            transform: scale(1.03);
+        }
+
+        .theme-card:active {
+            transform: scale(0.97);
+        }
+
+        .theme-card-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .theme-card-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+            color: white;
+        }
+
+        .theme-card-title {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .theme-card-hint {
+            font-size: 12px;
+            opacity: 0.85;
+        }
+
+        /* 特大型主题卡片 */
+        .theme-card.featured {
+            grid-column: span 2;
+            aspect-ratio: 2/1;
+        }
+
+        /* 底部导航 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 430px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            padding: 12px 24px 28px;
+            display: flex;
+            justify-content: space-around;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 12px;
+            transition: var(--transition-smooth);
+            background: transparent;
+            border: none;
+        }
+
+        .nav-item.active {
+            background: var(--mood-glow, rgba(91, 141, 238, 0.1));
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .nav-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .nav-item.active .nav-label {
+            color: var(--mood-primary, var(--primary-color));
+        }
+
+        /* ========== 主题探索空间 ========== */
+        .explore-page {
+            background: var(--mood-bg, var(--bg-primary));
+        }
+
+        .explore-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            padding: 48px 24px 16px;
+            background: linear-gradient(to bottom, var(--mood-bg, var(--bg-primary)) 70%, transparent 100%);
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-bottom: 16px;
+            transition: var(--transition-smooth);
+        }
+
+        .explore-title {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .explore-subtitle {
+            font-size: 15px;
+            color: var(--text-secondary);
+        }
+
+        /* 探索场景 */
+        .explore-scene {
+            padding: 0 24px 120px;
+        }
+
+        .scene-hero {
+            width: 100%;
+            height: 220px;
+            border-radius: 24px;
+            overflow: hidden;
+            margin-bottom: 32px;
+            position: relative;
+        }
+
+        .scene-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .scene-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 24px;
+            background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%);
+            color: white;
+        }
+
+        .scene-question {
+            font-size: 18px;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        /* 探索路径卡片 */
+        .explore-paths {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .path-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            border: 2px solid transparent;
+        }
+
+        .path-card:hover {
+            border-color: var(--mood-primary, var(--primary-color));
+            transform: translateX(4px);
+        }
+
+        .path-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        .path-question {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .path-hint {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .path-arrow {
+            float: right;
+            font-size: 18px;
+            color: var(--mood-primary, var(--primary-color));
+            margin-top: -30px;
+        }
+
+        /* ========== 推荐书籍页面 ========== */
+        .books-page {
+            background: var(--bg-primary);
+        }
+
+        .books-header {
+            padding: 48px 24px 20px;
+            background: linear-gradient(180deg, var(--mood-bg, #ECFDF5) 0%, var(--bg-primary) 100%);
+        }
+
+        .books-count {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .books-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .books-list {
+            padding: 20px 24px 120px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .book-card {
+            display: flex;
+            gap: 16px;
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .book-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--card-shadow);
+        }
+
+        .book-cover {
+            width: 90px;
+            height: 120px;
+            border-radius: 10px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .book-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .book-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+
+        .book-author {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .book-meta {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .book-tag {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: var(--mood-bg, rgba(91, 141, 238, 0.1));
+            color: var(--mood-primary, var(--primary-color));
+        }
+
+        /* ========== 书籍详情页 ========== */
+        .detail-page {
+            background: var(--bg-primary);
+        }
+
+        .detail-hero {
+            position: relative;
+            height: 380px;
+            overflow: hidden;
+        }
+
+        .detail-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            filter: blur(30px);
+            opacity: 0.4;
+            transform: scale(1.2);
+        }
+
+        .detail-cover-wrapper {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 160px;
+            height: 210px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .detail-cover {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .detail-back-btn {
+            position: absolute;
+            top: 48px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.95);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            z-index: 10;
+        }
+
+        .detail-content {
+            padding: 56px 24px 140px;
+            text-align: center;
+        }
+
+        .detail-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .detail-author {
+            font-size: 15px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .detail-tags {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .detail-section {
+            text-align: left;
+            margin-bottom: 28px;
+        }
+
+        .detail-section-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--mood-primary, var(--primary-color));
+        }
+
+        .detail-section-text {
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            border-radius: 14px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--mood-primary, var(--primary-color)) 0%, var(--mood-secondary, var(--secondary-color)) 100%);
+            color: white;
+            transition: var(--transition-smooth);
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 24px rgba(91, 141, 238, 0.35);
+        }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 14px;
+            border-radius: 14px;
+            border: 2px solid var(--mood-primary, var(--primary-color));
+            background: transparent;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--mood-primary, var(--primary-color));
+            transition: var(--transition-smooth);
+        }
+
+        /* 相关书籍推荐 */
+        .related-books {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(0,0,0,0.08);
+        }
+
+        .related-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 8px 0;
+            scrollbar-width: none;
+        }
+
+        .related-book {
+            flex-shrink: 0;
+            width: 110px;
+            cursor: pointer;
+        }
+
+        .related-cover {
+            width: 110px;
+            height: 145px;
+            border-radius: 10px;
+            object-fit: cover;
+            margin-bottom: 8px;
+        }
+
+        .related-title {
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* ========== 图书馆导航页 ========== */
+        .nav-page {
+            background: var(--bg-primary);
+        }
+
+        .map-container {
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .map-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.3;
+            background-image:
+                linear-gradient(rgba(99,102,241,0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99,102,241,0.3) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        .map-location {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .location-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(91, 141, 238, 0.4);
+        }
+
+        .location-dot.target {
+            width: 28px;
+            height: 28px;
+            background: #EF4444;
+            animation: targetPulse 1.5s infinite;
+        }
+
+        @keyframes targetPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            50% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+        }
+
+        .location-label {
+            margin-top: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            background: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+
+        .map-path {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .nav-info {
+            padding: 24px;
+        }
+
+        .nav-steps {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .nav-step {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+        }
+
+        .nav-step:last-child {
+            border-bottom: none;
+        }
+
+        .step-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--mood-bg, rgba(91, 141, 238, 0.15));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--mood-primary, var(--primary-color));
+            flex-shrink: 0;
+        }
+
+        .step-text {
+            font-size: 14px;
+        }
+
+        .step-text strong {
+            color: var(--mood-primary, var(--primary-color));
+        }
+
+        /* ========== AR沉浸模式 ========== */
+        .ar-page {
+            background: #000;
+        }
+
+        .ar-viewfinder {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+
+        .ar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .ar-scene-info {
+            position: absolute;
+            top: 60px;
+            left: 20px;
+            right: 20px;
+            color: white;
+        }
+
+        .ar-era-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            background: rgba(239, 68, 68, 0.9);
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .ar-scene-title {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .ar-scene-desc {
+            font-size: 14px;
+            opacity: 0.85;
+            line-height: 1.5;
+        }
+
+        .ar-timeline {
+            position: absolute;
+            bottom: 120px;
+            left: 20px;
+            right: 20px;
+        }
+
+        .timeline-track {
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            margin-bottom: 12px;
+        }
+
+        .timeline-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #EF4444, #F59E0B);
+            border-radius: 2px;
+            width: 35%;
+            transition: width 0.5s ease;
+        }
+
+        .timeline-eras {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .timeline-era {
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            pointer-events: auto;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: var(--transition-smooth);
+        }
+
+        .timeline-era.active {
+            color: white;
+            background: rgba(255,255,255,0.15);
+        }
+
+        .ar-controls {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 16px;
+        }
+
+        .ar-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-smooth);
+            pointer-events: auto;
+        }
+
+        .ar-btn:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        .ar-back-btn {
+            position: absolute;
+            top: 48px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            pointer-events: auto;
+        }
+
+        /* AR书籍浮层 */
+        .ar-book-popup {
+            position: absolute;
+            bottom: 200px;
+            right: 20px;
+            width: 200px;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 16px;
+            color: white;
+            pointer-events: auto;
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .ar-book-cover {
+            width: 60px;
+            height: 80px;
+            border-radius: 6px;
+            float: left;
+            margin-right: 12px;
+        }
+
+        .ar-book-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+
+        .ar-book-hint {
+            font-size: 11px;
+            opacity: 0.7;
+        }
+
+        /* ========== 同频共读页面 ========== */
+        .social-page {
+            background: linear-gradient(180deg, #FFF7ED 0%, var(--bg-primary) 100%);
+        }
+
+        .social-header {
+            padding: 48px 24px 24px;
+            text-align: center;
+        }
+
+        .social-title {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .social-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .reading-now {
+            padding: 0 24px 24px;
+        }
+
+        .now-reading-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .reader-count {
+            font-size: 48px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .reader-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .current-book {
+            display: flex;
+            gap: 16px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(0,0,0,0.08);
+            text-align: left;
+        }
+
+        .feelings-section {
+            padding: 0 24px 120px;
+        }
+
+        .feeling-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .feeling-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+        }
+
+        .feeling-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .feeling-content {
+            flex: 1;
+        }
+
+        .feeling-text {
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 6px;
+        }
+
+        .feeling-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .my-feeling-input {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .input-area {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            resize: none;
+            min-height: 60px;
+            font-family: inherit;
+        }
+
+        .input-area::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .submit-feeling {
+            margin-top: 12px;
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* ========== 城市文化地图 ========== */
+        .city-page {
+            background: var(--bg-primary);
+        }
+
+        .city-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 20px 24px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--mood-primary, var(--primary-color));
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .city-map {
+            margin: 0 24px;
+            height: 280px;
+            background: linear-gradient(135deg, #E0E7FF 0%, #FCE7F3 100%);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hotspot {
+            position: absolute;
+            cursor: pointer;
+            animation: hotspotPulse 2s infinite;
+        }
+
+        @keyframes hotspotPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .hotspot-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #EF4444;
+            border: 2px solid white;
+        }
+
+        .hotspot-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid #EF4444;
+            opacity: 0.3;
+            animation: ringExpand 2s infinite;
+        }
+
+        @keyframes ringExpand {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+            100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+        }
+
+        .hotspot-label {
+            position: absolute;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-size: 11px;
+            font-weight: 600;
+            background: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .trending-section {
+            padding: 24px;
+        }
+
+        .trending-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .trending-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: white;
+            border-radius: 14px;
+            padding: 14px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .trending-item:hover {
+            transform: translateX(4px);
+        }
+
+        .trending-rank {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .trending-rank.gold { background: linear-gradient(135deg, #F59E0B, #D97706); }
+        .trending-rank.silver { background: linear-gradient(135deg, #9CA3AF, #6B7280); }
+        .trending-rank.bronze { background: linear-gradient(135deg, #D97706, #B45309); }
+
+        .trending-info {
+            flex: 1;
+        }
+
+        .trending-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .trending-readers {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* ========== 个人成长页面 ========== */
+        .profile-page {
+            background: linear-gradient(180deg, var(--mood-bg, #EEF2FF) 0%, var(--bg-primary) 50%);
+        }
+
+        .profile-header {
+            padding: 60px 24px 30px;
+            text-align: center;
+        }
+
+        .avatar-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--mood-primary, var(--primary-color)), var(--mood-secondary, var(--secondary-color)));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 42px;
+            margin: 0 auto 16px;
+            box-shadow: 0 8px 24px rgba(91, 141, 238, 0.25);
+        }
+
+        .profile-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .profile-level {
+            display: inline-block;
+            padding: 4px 14px;
+            background: linear-gradient(135deg, #F59E0B, #EF4444);
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 0 24px 24px;
+        }
+
+        .profile-stat {
+            background: white;
+            border-radius: 16px;
+            padding: 18px 12px;
+            text-align: center;
+        }
+
+        .profile-stat-value {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--mood-primary, var(--primary-color));
+        }
+
+        .profile-stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .journey-section {
+            padding: 0 24px 120px;
+        }
+
+        .journey-timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .journey-line {
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--mood-primary, var(--primary-color)) 0%, transparent 100%);
+        }
+
+        .journey-item {
+            position: relative;
+            padding-bottom: 24px;
+        }
+
+        .journey-dot {
+            position: absolute;
+            left: -24px;
+            top: 4px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--mood-primary, var(--primary-color));
+            border: 2px solid white;
+        }
+
+        .journey-card {
+            background: white;
+            border-radius: 14px;
+            padding: 16px;
+        }
+
+        .journey-date {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .journey-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .journey-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* ========== 情绪选择面板 ========== */
+        .mood-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .mood-panel.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mood-options {
+            background: white;
+            border-radius: 24px 24px 0 0;
+            padding: 32px 24px 48px;
+            width: 100%;
+            max-width: 430px;
+            transform: translateY(100%);
+            transition: transform 0.4s ease;
+        }
+
+        .mood-panel.show .mood-options {
+            transform: translateY(0);
+        }
+
+        .mood-panel-title {
+            font-size: 20px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .mood-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .mood-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 20px 12px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            border: 2px solid transparent;
+            background: var(--bg-secondary);
+        }
+
+        .mood-option:hover {
+            transform: scale(1.05);
+        }
+
+        .mood-option.selected {
+            border-color: var(--mood-primary, var(--primary-color));
+            background: var(--mood-bg, rgba(91, 141, 238, 0.1));
+        }
+
+        .mood-emoji {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .mood-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* 连续探索提示 */
+        .explore-continue {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 48px);
+            max-width: 382px;
+            background: white;
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            z-index: 50;
+            display: none;
+            animation: slideUpContinue 0.4s ease;
+        }
+
+        @keyframes slideUpContinue {
+            from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+
+        .explore-continue.show {
+            display: block;
+        }
+
+        .continue-hint {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .continue-question {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .continue-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, var(--mood-primary, var(--primary-color)), var(--mood-secondary, var(--secondary-color)));
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 隐藏滚动条但保持功能 */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        .page {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 430px) {
+            .app-container {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container" data-mood="curious">
+
+    <!-- ==================== 页面1: 首页 / 数字图书馆入口 ==================== -->
+    <div class="page home-page active" id="page-home">
+        <div class="home-header">
+            <div class="logo-area">
+                <div class="logo-text">数字图书馆</div>
+                <div class="logo-subtitle">探索 · 发现 · 连接</div>
+            </div>
+            <button class="mood-selector" onclick="toggleMoodPanel()">😊</button>
+        </div>
+
+        <div class="welcome-section">
+            <h1 class="welcome-title">今天想探索什么？</h1>
+            <p class="welcome-desc">像逛展一样逛图书馆，让好奇心带你发现新世界</p>
+        </div>
+
+        <div class="theme-spaces">
+            <p class="section-label">知识主题空间</p>
+            <div class="theme-grid">
+                <!-- 特色大卡片 -->
+                <div class="theme-card featured" onclick="navigateTo('explore', 'dinosaur')">
+                    <svg class="theme-card-bg" viewBox="0 0 400 200">
+                        <defs>
+                            <linearGradient id="dinoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#1a1a2e"/>
+                                <stop offset="100%" style="stop-color:#16213e"/>
+                            </linearGradient>
+                        </defs>
+                        <rect fill="url(#dinoGrad)" width="400" height="200"/>
+                        <ellipse cx="280" cy="140" rx="80" ry="40" fill="#0f3460" opacity="0.5"/>
+                        <ellipse cx="100" cy="160" rx="60" ry="25" fill="#0f3460" opacity="0.3"/>
+                        <circle cx="320" cy="60" r="30" fill="#f39c12" opacity="0.6"/>
+                        <path d="M150 120 Q200 80 250 110 Q300 140 280 170 Q240 190 180 175 Q130 160 150 120" fill="#2c3e50"/>
+                        <path d="M155 125 Q195 95 240 115 Q275 135 260 158 Q225 172 178 162 Q142 152 155 125" fill="#34495e"/>
+                        <circle cx="230" cy="118" r="8" fill="#e74c3c"/>
+                        <path d="M240 115 L255 108 L245 122 Z" fill="#2c3e50"/>
+                    </svg>
+                    <div class="theme-card-content">
+                        <div class="theme-card-title">恐龙探索</div>
+                        <div class="theme-card-hint">霸王龙为什么拥有如此强大的咬合力？</div>
+                    </div>
+                </div>
+
+                <!-- 植物世界 -->
+                <div class="theme-card" onclick="navigateTo('explore', 'plant')">
+                    <svg class="theme-card-bg" viewBox="0 0 200 200">
+                        <defs>
+                            <linearGradient id="plantGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+                                <stop offset="0%" style="stop-color:#134e5e"/>
+                                <stop offset="100%" style="stop-color:#71b280"/>
+                            </linearGradient>
+                        </defs>
+                        <rect fill="url(#plantGrad)" width="200" height="200"/>
+                        <ellipse cx="100" cy="180" rx="70" ry="15" fill="#065f46" opacity="0.3"/>
+                        <path d="M100 180 L100 100" stroke="#166534" stroke-width="6" stroke-linecap="round"/>
+                        <ellipse cx="85" cy="105" rx="25" ry="15" fill="#22c55e" transform="rotate(-30 85 105)"/>
+                        <ellipse cx="115" cy="95" rx="28" ry="16" fill="#16a34a" transform="rotate(25 115 95)"/>
+                        <ellipse cx="100" cy="75" rx="22" ry="14" fill="#4ade80" transform="rotate(-10 100 75)"/>
+                        <circle cx="100" cy="65" r="12" fill="#fbbf24"/>
+                        <circle cx="95" cy="62" r="4" fill="#f59e0b"/>
+                        <circle cx="106" cy="67" r="3" fill="#f59e0b"/>
+                    </svg>
+                    <div class="theme-card-content">
+                        <div class="theme-card-title">植物世界</div>
+                        <div class="theme-card-hint">植物为什么会睡觉？</div>
+                    </div>
+                </div>
+
+                <!-- 宇宙探索 -->
+                <div class="theme-card" onclick="navigateTo('explore', 'space')">
+                    <svg class="theme-card-bg" viewBox="0 0 200 200">
+                        <defs>
+                            <linearGradient id="spaceGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#0c1445"/>
+                                <stop offset="100%" style="stop-color:#1a237e"/>
+                            </linearGradient>
+                        </defs>
+                        <rect fill="url(#spaceGrad)" width="200" height="200"/>
+                        <circle cx="45" cy="40" r="2" fill="white" opacity="0.8"/>
+                        <circle cx="160" cy="55" r="1.5" fill="white" opacity="0.6"/>
+                        <circle cx="90" cy="30" r="1" fill="white" opacity="0.9"/>
+                        <circle cx="175" cy="130" r="2" fill="white" opacity="0.7"/>
+                        <circle cx="30" cy="150" r="1.5" fill="white" opacity="0.5"/>
+                        <circle cx="140" cy="170" r="1" fill="white" opacity="0.8"/>
+                        <circle cx="100" cy="100" r="35" fill="#ff9800" opacity="0.9"/>
+                        <circle cx="100" cy="100" r="30" fill="#ffb74d"/>
+                        <circle cx="88" cy="92" r="8" fill="#ffe0b2" opacity="0.4"/>
+                        <circle cx="112" cy="105" r="5" fill="#ffe0b2" opacity="0.3"/>
+                        <ellipse cx="100" cy="145" rx="50" ry="10" fill="#64b5f6" opacity="0.3" transform="rotate(-20 100 145)"/>
+                        <ellipse cx="100" cy="148" rx="48" ry="8" fill="#90caf9" opacity="0.2" transform="rotate(-20 100 148)"/>
+                    </svg>
+                    <div class="theme-card-content">
+                        <div class="theme-card-title">宇宙探索</div>
+                        <div class="theme-card-hint">黑洞的另一边是什么？</div>
+                    </div>
+                </div>
+
+                <!-- 榆林历史 -->
+                <div class="theme-card featured" onclick="navigateTo('ar', 'yulin')">
+                    <svg class="theme-card-bg" viewBox="0 0 400 200">
+                        <defs>
+                            <linearGradient id="historyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#5d4037"/>
+                                <stop offset="100%" style="stop-color:#8d6e63"/>
+                            </linearGradient>
+                        </defs>
+                        <rect fill="url(#historyGrad)" width="400" height="200"/>
+                        <rect x="50" y="60" width="80" height="100" fill="#a1887f" rx="4"/>
+                        <polygon points="50,60 90,30 130,60" fill="#6d4c41"/>
+                        <rect x="65" y="100" width="20" height="30" fill="#4e342e" rx="2"/>
+                        <rect x="100" y="85" width="18" height="25" fill="#4e342e" rx="2"/>
+                        <path d="M200 140 L250 80 L300 140 Z" fill="#8d6e63"/>
+                        <rect x="225" y="115" width="20" height="25" fill="#5d4037"/>
+                        <rect x="260" y="115" width="20" height="25" fill="#5d4037"/>
+                        <path d="M320 100 Q340 80 360 100 Q370 120 350 140 L330 140 Q310 120 320 100" fill="#d7ccc8"/>
+                        <circle cx="365" cy="50" r="20" fill="#ffcc80" opacity="0.6"/>
+                    </svg>
+                    <div class="theme-card-content">
+                        <div class="theme-card-title">榆林历史</div>
+                        <div class="theme-card-hint">100年前的榆林是什么样？—— AR沉浸体验</div>
+                    </div>
+                </div>
+
+                <!-- 非遗文化 -->
+                <div class="theme-card" onclick="navigateTo('explore', 'heritage')">
+                    <svg class="theme-card-bg" viewBox="0 0 200 200">
+                        <defs>
+                            <linearGradient id="heritageGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#c62828"/>
+                                <stop offset="100%" style="stop-color:#e65100"/>
+                            </linearGradient>
+                        </defs>
+                        <rect fill="url(#heritageGrad)" width="200" height="200"/>
+                        <circle cx="100" cy="100" r="60" fill="none" stroke="#ffcdd2" stroke-width="3" opacity="0.6"/>
+                        <circle cx="100" cy="100" r="45" fill="none" stroke="#ffcdd2" stroke-width="2" opacity="0.4"/>
+                        <path d="M100 55 L110 85 L140 85 L116 103 L126 133 L100 115 L74 133 L84 103 L60 85 L90 85 Z" fill="#ffeb3b"/>
+                        <circle cx="100" cy="100" r="20" fill="#ff5722" opacity="0.5"/>
+                        <path d="M85 95 Q100 85 115 95 Q100 105 85 95" fill="#ffc107"/>
+                    </svg>
+                    <div class="theme-card-content">
+                        <div class="theme-card-title">非遗文化</div>
+                        <div class="theme-card-hint">千年技艺如何传承？</div>
+                    </div>
+                </div>
+
+                <!-- 艺术世界 -->
+                <div class="theme-card" onclick="navigateTo('explore', 'art')">
+                    <svg class="theme-card-bg" viewBox="0 0 200 200">
+                        <defs>
+                            <linearGradient id="artGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#7b1fa2"/>
+                                <stop offset="50%" style="stop-color:#e91e63"/>
+                                <stop offset="100%" style="stop-color:#ff5722"/>
+                            </linearGradient>
+                        </defs>
+                        <rect fill="url(#artGrad)" width="200" height="200"/>
+                        <circle cx="70" cy="80" r="30" fill="#fce4ec" opacity="0.7"/>
+                        <circle cx="140" cy="120" r="40" fill="#e1bee7" opacity="0.6"/>
+                        <rect x="50" y="130" width="100" height="8" rx="4" fill="#fff" opacity="0.5"/>
+                        <path d="M60 70 Q80 50 100 70 Q120 90 100 110 Q80 130 60 110 Q40 90 60 70" fill="none" stroke="#fff" stroke-width="3" opacity="0.6"/>
+                        <circle cx="130" cy="70" r="15" fill="#ffd54f" opacity="0.7"/>
+                    </svg>
+                    <div class="theme-card-content">
+                        <div class="theme-card-title">艺术世界</div>
+                        <div class="theme-card-hint">色彩如何诉说情感？</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 页面2: 主题探索空间 ==================== -->
+    <div class="page explore-page" id="page-explore">
+        <div class="explore-header">
+            <button class="back-btn" onclick="navigateTo('home')">←</button>
+            <h1 class="explore-title" id="explore-title">恐龙探索</h1>
+            <p class="explore-subtitle" id="explore-subtitle">走进史前世界，发现生命的奥秘</p>
+        </div>
+
+        <div class="explore-scene">
+            <div class="scene-hero" id="scene-hero">
+                <svg class="scene-image" viewBox="0 0 400 220" preserveAspectRatio="xMidYMid slice">
+                    <defs>
+                        <linearGradient id="sceneGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#87ceeb"/>
+                            <stop offset="60%" style="stop-color:#98d8c8"/>
+                            <stop offset="100%" style="stop-color:#7cb342"/>
+                        </linearGradient>
+                    </defs>
+                    <rect fill="url(#sceneGrad)" width="400" height="220"/>
+                    <ellipse cx="200" cy="210" rx="180" ry="20" fill="#558b2f" opacity="0.4"/>
+                    <path d="M80 180 Q120 140 160 160 Q200 180 240 165 Q280 150 320 170 L320 210 L80 210 Z" fill="#795548"/>
+                    <path d="M140 165 L140 130 L160 130 L160 160" fill="#5d4037"/>
+                    <path d="M160 130 L180 110 L185 132 L168 138 Z" fill="#4e342e"/>
+                    <ellipse cx="172" cy="118" r="5" fill="#f44336"/>
+                    <path d="M177 117 L188 114 L181 123 Z" fill="#4e342e"/>
+                    <ellipse cx="60" cy="170" rx="30" ry="12" fill="#81c784" opacity="0.6"/>
+                    <ellipse cx="340" cy="175" rx="40" ry="15" fill="#aed581" opacity="0.5"/>
+                    <circle cx="320" cy="40" r="25" fill="#fff176" opacity="0.8"/>
+                    <path d="M50 80 Q70 60 90 75 Q80 95 60 90 Z" fill="#fff" opacity="0.4"/>
+                    <path d="M300 70 Q330 50 350 70 Q340 90 315 85 Z" fill="#fff" opacity="0.3"/>
+                </svg>
+                <div class="scene-overlay">
+                    <p class="scene-question" id="scene-question">霸王龙为什么拥有如此强大的咬合力？</p>
+                </div>
+            </div>
+
+            <p class="section-label">你想探索什么秘密？</p>
+            <div class="explore-paths" id="explore-paths">
+                <div class="path-card" onclick="navigateTo('books')">
+                    <div class="path-icon" style="background: #FEF3C7;">🦷</div>
+                    <p class="path-question">霸王龙的牙齿有多锋利？</p>
+                    <p class="path-hint">了解史前霸主的武器</p>
+                    <span class="path-arrow">→</span>
+                </div>
+                <div class="path-card" onclick="navigateTo('books')">
+                    <div class="path-icon" style="background: #DBEAFE;">🌍</div>
+                    <p class="path-question">恐龙生活的地球是什么样的？</p>
+                    <p class="path-hint">穿越回侏罗纪时期</p>
+                    <span class="path-arrow">→</span>
+                </div>
+                <div class="path-card" onclick="navigateTo('books')">
+                    <div class="path-icon" style="background: #FCE7F3;">🔍</div>
+                    <p class="path-question">恐龙是如何消失的？</p>
+                    <p class="path-hint">探索物种灭绝之谜</p>
+                    <span class="path-arrow">→</span>
+                </div>
+                <div class="path-card" onclick="navigateTo('books')">
+                    <div class="path-icon" style="background: #D1FAE5;">🥚</div>
+                    <p class="path-question">小恐龙是怎么出生的？</p>
+                    <p class="path-hint">生命的奇妙旅程</p>
+                    <span class="path-arrow">→</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 页面3-4: 推荐书籍列表 ==================== -->
+    <div class="page books-page" id="page-books">
+        <div class="books-header">
+            <button class="back-btn" onclick="navigateTo('explore')">←</button>
+            <p class="books-count">为你推荐 5 本书籍</p>
+            <h1 class="books-title" id="books-title">恐龙探索相关书籍</h1>
+        </div>
+
+        <div class="books-list" id="books-list">
+            <div class="book-card" onclick="navigateTo('detail')">
+                <svg class="book-cover" viewBox="0 0 90 120">
+                    <defs>
+                        <linearGradient id="book1" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#1a237e"/>
+                            <stop offset="100%" style="stop-color:#3949ab"/>
+                        </linearGradient>
+                    </defs>
+                    <rect fill="url(#book1)" width="90" height="120" rx="4"/>
+                    <text x="45" y="50" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">恐龙</text>
+                    <text x="45" y="70" text-anchor="middle" fill="#c5cae9" font-size="10">百科全书</text>
+                    <circle cx="45" cy="95" r="15" fill="#ff5722" opacity="0.8"/>
+                    <path d="M40 92 L45 85 L50 92 L47 92 L47 100 L43 100 L43 92 Z" fill="#fff"/>
+                </svg>
+                <div class="book-info">
+                    <h3 class="book-title">神奇的恐龙世界</h3>
+                    <p class="book-author">张明 著 · 适合 8-12 岁</p>
+                    <div class="book-meta">
+                        <span class="book-tag">科普</span>
+                        <span class="book-tag">恐龙</span>
+                        <span class="book-tag">插图版</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="book-card" onclick="navigateTo('detail')">
+                <svg class="book-cover" viewBox="0 0 90 120">
+                    <defs>
+                        <linearGradient id="book2" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#bf360c"/>
+                            <stop offset="100%" style="stop-color:#e64a19"/>
+                        </linearGradient>
+                    </defs>
+                    <rect fill="url(#book2)" width="90" height="120" rx="4"/>
+                    <text x="45" y="45" text-anchor="middle" fill="#fff" font-size="13" font-weight="bold">霸王龙</text>
+                    <text x="45" y="63" text-anchor="middle" fill="#ffccbc" font-size="10">的秘密生活</text>
+                    <path d="M25 85 Q45 75 65 85 Q55 100 45 102 Q35 100 25 85" fill="#ffcdd2"/>
+                    <circle cx="38" cy="88" r="3" fill="#333"/>
+                    <circle cx="52" cy="88" r="3" fill="#333"/>
+                </svg>
+                <div class="book-info">
+                    <h3 class="book-title">霸王龙的秘密生活</h3>
+                    <p class="book-author">李华 著 · 适合 6-10 岁</p>
+                    <div class="book-meta">
+                        <span class="book-tag">故事</span>
+                        <span class="book-tag">趣味</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="book-card" onclick="navigateTo('detail')">
+                <svg class="book-cover" viewBox="0 0 90 120">
+                    <defs>
+                        <linearGradient id="book3" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#00695c"/>
+                            <stop offset="100%" style="stop-color:#00897b"/>
+                        </linearGradient>
+                    </defs>
+                    <rect fill="url(#book3)" width="90" height="120" rx="4"/>
+                    <text x="45" y="48" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">从海洋</text>
+                    <text x="45" y="65" text-anchor="middle" fill="#b2dfdb" font-size="12" font-weight="bold">到陆地</text>
+                    <ellipse cx="45" cy="92" rx="20" ry="10" fill="#80cbc4" opacity="0.5"/>
+                    <path d="M30 90 Q45 82 60 90" stroke="#fff" stroke-width="2" fill="none"/>
+                </svg>
+                <div class="book-info">
+                    <h3 class="book-title">从海洋到陆地：生命进化之旅</h3>
+                    <p class="book-author">王芳 著 · 适合 10-14 岁</p>
+                    <div class="book-meta">
+                        <span class="book-tag">进化</span>
+                        <span class="book-tag">科学</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="book-card" onclick="navigateTo('detail')">
+                <svg class="book-cover" viewBox="0 0 90 120">
+                    <defs>
+                        <linearGradient id="book4" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#4a148c"/>
+                            <stop offset="100%" style="stop-color:#7b1fa2"/>
+                        </linearGradient>
+                    </defs>
+                    <rect fill="url(#book4)" width="90" height="120" rx="4"/>
+                    <text x="45" y="45" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">化石猎人</text>
+                    <text x="45" y="63" text-anchor="middle" fill="#e1bee7" font-size="10">日记</text>
+                    <rect x="25" y="78" width="40" height="30" rx="3" fill="#ce93d8" opacity="0.5"/>
+                    <line x1="30" y1="85" x2="60" y2="85" stroke="#fff" stroke-width="1"/>
+                    <line x1="30" y1="92" x2="55" y2="92" stroke="#fff" stroke-width="1"/>
+                    <line x1="30" y1="99" x2="58" y2="99" stroke="#fff" stroke-width="1"/>
+                </svg>
+                <div class="book-info">
+                    <h3 class="book-title">化石猎人的日记</h3>
+                    <p class="book-author">陈伟 著 · 适合 9-13 岁</p>
+                    <div class="book-meta">
+                        <span class="book-tag">探险</span>
+                        <span class="book-tag">考古</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="book-card" onclick="navigateTo('detail')">
+                <svg class="book-cover" viewBox="0 0 90 120">
+                    <defs>
+                        <linearGradient id="book5" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#e65100"/>
+                            <stop offset="100%" style="stop-color:#f57c00"/>
+                        </linearGradient>
+                    </defs>
+                    <rect fill="url(#book5)" width="90" height="120" rx="4"/>
+                    <text x="45" y="42" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">小恐龙</text>
+                    <text x="45" y="58" text-anchor="middle" fill="#ffe0b2" font-size="11" font-weight="bold">大冒险</text>
+                    <circle cx="35" cy="85" r="12" fill="#ffb74d"/>
+                    <circle cx="30" cy="82" r="2" fill="#333"/>
+                    <circle cx="55" cy="88" r="10" fill="#ffa726"/>
+                    <circle cx="52" cy="86" r="2" fill="#333"/>
+                </svg>
+                <div class="book-info">
+                    <h3 class="book-title">小恐龙大冒险</h3>
+                    <p class="book-author">周静 著 · 适合 5-8 岁</p>
+                    <div class="book-meta">
+                        <span class="book-tag">绘本</span>
+                        <span class="book-tag">亲子共读</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 页面5: 书籍详情页 ==================== -->
+    <div class="page detail-page" id="page-detail">
+        <div class="detail-hero">
+            <svg class="detail-bg" viewBox="0 0 400 380">
+                <defs>
+                    <linearGradient id="detailBg" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#1a237e"/>
+                        <stop offset="100%" style="stop-color:#3949ab"/>
+                    </linearGradient>
+                </defs>
+                <rect fill="url(#detailBg)" width="400" height="380"/>
+            </svg>
+            <button class="detail-back-btn" onclick="navigateTo('books')">←</button>
+            <div class="detail-cover-wrapper">
+                <svg class="detail-cover" viewBox="0 0 160 210">
+                    <defs>
+                        <linearGradient id="coverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#1a237e"/>
+                            <stop offset="100%" style="stop-color:#3949ab"/>
+                        </linearGradient>
+                    </defs>
+                    <rect fill="url(#coverGrad)" width="160" height="210" rx="8"/>
+                    <text x="80" y="85" text-anchor="middle" fill="#fff" font-size="22" font-weight="bold">恐龙</text>
+                    <text x="80" y="115" text-anchor="middle" fill="#c5cae9" font-size="15">百科全书</text>
+                    <circle cx="80" cy="155" r="28" fill="#ff5722" opacity="0.85"/>
+                    <path d="M72 150 L80 138 L88 150 L84 150 L84 165 L76 165 L76 150 Z" fill="#fff"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="detail-content">
+            <h1 class="detail-title">神奇的恐龙世界</h1>
+            <p class="detail-author">张明 著</p>
+
+            <div class="detail-tags">
+                <span class="book-tag">科普</span>
+                <span class="book-tag">恐龙</span>
+                <span class="book-tag">8-12岁</span>
+                <span class="book-tag">全彩插图</span>
+            </div>
+
+            <div class="detail-section">
+                <h3 class="detail-section-title">关于这本书</h3>
+                <p class="detail-section-text">
+                    这是一本专为好奇少年打造的恐龙百科全书。书中用生动的语言和精美的插图，
+                    带你穿越时空，回到那个充满神秘色彩的史前世界。
+                    从霸王龙的恐怖咬合力到三角龙的独特防御，
+                    每一页都藏着令人惊叹的知识宝藏。
+                </p>
+            </div>
+
+            <div class="detail-section">
+                <h3 class="detail-section-title">你将发现</h3>
+                <p class="detail-section-text">
+                    ✓ 恐龙为什么能长那么大<br>
+                    ✓ 不同恐龙的独特生存技能<br>
+                    ✓ 化石是如何形成的<br>
+                    ✓ 古生物学家的工作日常
+                </p>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn-primary" onclick="navigateTo('navigation')">📍 去找这本书</button>
+                <button class="btn-secondary" onclick="showExploreContinue()">🚀 开始探索</button>
+                <button class="btn-secondary" onclick="navigateTo('social')">💬 继续发现</button>
+            </div>
+
+            <div class="related-books">
+                <h3 class="detail-section-title">继续探索</h3>
+                <div class="related-scroll">
+                    <div class="related-book" onclick="navigateTo('detail')">
+                        <svg class="related-cover" viewBox="0 0 110 145">
+                            <rect fill="#e64a19" width="110" height="145" rx="6"/>
+                            <text x="55" y="70" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">霸王龙</text>
+                        </svg>
+                        <p class="related-title">霸王龙的秘密生活</p>
+                    </div>
+                    <div class="related-book" onclick="navigateTo('detail')">
+                        <svg class="related-cover" viewBox="0 0 110 145">
+                            <rect fill="#00897b" width="110" height="145" rx="6"/>
+                            <text x="55" y="70" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">进化之旅</text>
+                        </svg>
+                        <p class="related-title">从海洋到陆地</p>
+                    </div>
+                    <div class="related-book" onclick="navigateTo('detail')">
+                        <svg class="related-cover" viewBox="0 0 110 145">
+                            <rect fill="#7b1fa2" width="110" height="145" rx="6"/>
+                            <text x="55" y="70" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">化石猎人</text>
+                        </svg>
+                        <p class="related-title">化石猎人的日记</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 页面6: 图书馆空间导航 ==================== -->
+    <div class="page nav-page" id="page-navigation">
+        <div class="explore-header">
+            <button class="back-btn" onclick="navigateTo('detail')">←</button>
+            <h1 class="explore-title">寻找《神奇的恐龙世界》</h1>
+            <p class="explore-subtitle">跟随指引找到你的书</p>
+        </div>
+
+        <div class="map-container">
+            <div class="map-grid"></div>
+
+            <!-- 当前位置 -->
+            <div class="map-location" style="left: 15%; top: 70%;">
+                <div class="location-dot"></div>
+                <span class="location-label">你在这里</span>
+            </div>
+
+            <!-- 目标书架 -->
+            <div class="map-location" style="right: 20%; top: 25%;">
+                <div class="location-dot target"></div>
+                <span class="location-label">目标书架 B3-12</span>
+            </div>
+
+            <!-- 路径线 SVG -->
+            <svg class="map-path" viewBox="0 0 400 400" preserveAspectRatio="none">
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#5B8DEE"/>
+                    </marker>
+                </defs>
+                <path d="M60 280 Q150 280 180 200 T300 100"
+                      stroke="#5B8DEE"
+                      stroke-width="4"
+                      fill="none"
+                      stroke-dasharray="12,6"
+                      marker-end="url(#arrowhead)"
+                      opacity="0.8">
+                    <animate attributeName="stroke-dashoffset" from="0" to="-36" dur="1s" repeatCount="indefinite"/>
+                </path>
+            </svg>
+
+            <!-- 中间节点 -->
+            <div class="map-location" style="left: 42%; top: 48%;">
+                <div class="location-dot" style="background: #10B981;"></div>
+                <span class="location-label">儿童阅读区</span>
+            </div>
+        </div>
+
+        <div class="nav-info">
+            <div class="nav-steps">
+                <div class="nav-step">
+                    <span class="step-number">1</span>
+                    <span class="step-text"><strong>向前走</strong> 经过服务台</span>
+                </div>
+                <div class="nav-step">
+                    <span class="step-number">2</span>
+                    <span class="step-text"><strong>左转</strong> 进入儿童阅读区</span>
+                </div>
+                <div class="nav-step">
+                    <span class="step-number">3</span>
+                    <span class="step-text"><strong>直行</strong> 找到 B 排书架</span>
+                </div>
+                <div class="nav-step">
+                    <span class="step-number">4</span>
+                    <span class="step-text"><strong>到达</strong> 第 3 层第 12 个位置</span>
+                </div>
+            </div>
+
+            <button class="btn-primary" onclick="showExploreContinue()">✅ 我找到了！</button>
+        </div>
+    </div>
+
+    <!-- ==================== 页面7: AR历史沉浸模式 ==================== -->
+    <div class="page ar-page" id="page-ar">
+        <div class="ar-viewfinder">
+            <button class="ar-back-btn" onclick="navigateTo('home')">←</button>
+
+            <div class="ar-overlay">
+                <!-- AR 场景背景元素 -->
+                <svg width="100%" height="100%" style="position:absolute;top:0;left:0;">
+                    <defs>
+                        <radialGradient id="arGlow" cx="50%" cy="40%" r="50%">
+                            <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:0.15"/>
+                            <stop offset="100%" style="stop-color:transparent;stop-opacity:0"/>
+                        </radialGradient>
+                    </defs>
+                    <rect fill="url(#arGlow)" width="100%" height="100%"/>
+
+                    <!-- 历史建筑轮廓 -->
+                    <g opacity="0.15" stroke="#f59e0b" stroke-width="1" fill="none">
+                        <rect x="40" y="200" width="100" height="140" rx="2"/>
+                        <polygon points="40,200 90,160 140,200"/>
+                        <rect x="60" y="260" width="25" height="40"/>
+                        <rect x="100" y="250" width="25" height="50"/>
+
+                        <path d="M220 280 L260 220 L300 280 L290 280 L290 340 L230 340 L230 280 Z"/>
+                        <rect x="250" y="300" width="20" height="40"/>
+                    </g>
+
+                    <!-- 粒子效果 -->
+                    <circle cx="100" cy="150" r="2" fill="#fbbf24" opacity="0.6">
+                        <animate attributeName="cy" values="150;130;150" dur="3s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.6;0.2;0.6" dur="3s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="300" cy="200" r="1.5" fill="#fbbf24" opacity="0.5">
+                        <animate attributeName="cy" values="200;180;200" dur="4s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="200" cy="100" r="1" fill="#fbbf24" opacity="0.7">
+                        <animate attributeName="cy" values="100;85;100" dur="2.5s" repeatCount="indefinite"/>
+                    </circle>
+                </svg>
+            </div>
+
+            <div class="ar-scene-info">
+                <span class="ar-era-badge">明代榆林</span>
+                <h1 class="ar-scene-title">镇北台 · 万里长城第一台</h1>
+                <p class="ar-scene-desc">建于明万历三十五年（1607年），是明长城沿线最大的军事瞭望台之一。</p>
+            </div>
+
+            <!-- AR 书籍浮层 -->
+            <div class="ar-book-popup">
+                <svg class="ar-book-cover" viewBox="0 0 60 80">
+                    <rect fill="#5d4037" width="60" height="80" rx="4"/>
+                    <text x="30" y="42" text-anchor="middle" fill="#d7ccc8" font-size="10" font-weight="bold">榆林志</text>
+                </svg>
+                <div>
+                    <p class="ar-book-title">榆林地方志</p>
+                    <p class="ar-book-hint">点击查看详情 →</p>
+                </div>
+            </div>
+
+            <div class="ar-timeline">
+                <div class="timeline-track">
+                    <div class="timeline-progress" id="timeline-progress"></div>
+                </div>
+                <div class="timeline-eras">
+                    <span class="timeline-era active" onclick="selectEra(this, '秦')">秦汉</span>
+                    <span class="timeline-era" onclick="selectEra(this, '唐')">隋唐</span>
+                    <span class="timeline-era" onclick="selectEra(this, '明')" style="color:white;background:rgba(255,255,255,0.15)">明代</span>
+                    <span class="timeline-era" onclick="selectEra(this, '清')">清代</span>
+                    <span class="timeline-era" onclick="selectEra(this, 'modern')">近现代</span>
+                </div>
+            </div>
+
+            <div class="ar-controls">
+                <button class="ar-btn" title="扫描识别">📷</button>
+                <button class="ar-btn" title="收藏场景" onclick="navigateTo('detail')">⭐</button>
+                <button class="ar-btn" title="相关书籍" onclick="navigateTo('books')">📚</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 页面8-9: 同频共读 (社交) ==================== -->
+    <div class="page social-page" id="page-social">
+        <div class="social-header">
+            <button class="back-btn" onclick="navigateTo('home')" style="position:absolute;left:20px;top:48px;">←</button>
+            <h1 class="social-title">同频共读</h1>
+            <p class="social-subtitle">发现和你一样热爱阅读的人</p>
+        </div>
+
+        <div class="reading-now">
+            <div class="now-reading-card">
+                <p class="reader-count">37</p>
+                <p class="reader-label">人正在读《神奇的恐龙世界》</p>
+                <div class="current-book">
+                    <svg style="width:60px;height:80px;border-radius:8px;" viewBox="0 0 60 80">
+                        <rect fill="#3949ab" width="60" height="80" rx="4"/>
+                        <text x="30" y="42" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">恐龙</text>
+                    </svg>
+                    <div>
+                        <p style="font-weight:600;font-size:14px;">神奇的恐龙世界</p>
+                        <p style="font-size:12px;color:var(--text-secondary);margin-top:4px;">加入他们的阅读旅程</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="feelings-section">
+            <p class="section-label">大家的阅读感受</p>
+            <div class="feeling-cards">
+                <div class="feeling-card">
+                    <div class="feeling-avatar" style="background: #FEF3C7;">🌟</div>
+                    <div class="feeling-content">
+                        <p class="feeling-text">"原来霸王龙的前臂这么短是有原因的！"</p>
+                        <p class="feeling-meta">匿名读者 · 开心 · 10分钟前</p>
+                    </div>
+                </div>
+                <div class="feeling-card">
+                    <div class="feeling-avatar" style="background: #DBEAFE;">🤔</div>
+                    <div class="feeling-content">
+                        <p class="feeling-text">"看完想去博物馆看真正的化石了"</p>
+                        <p class="feeling-meta">好奇星球 · 好奇 · 32分钟前</p>
+                    </div>
+                </div>
+                <div class="feeling-card">
+                    <div class="feeling-avatar" style="background: #FCE7F3;">💝</div>
+                    <div class="feeling-content">
+                        <p class="feeling-text">"和孩子一起读完的，他问了一百个问题哈哈"</p>
+                        <p class="feeling-meta">亲子时光 · 温暖 · 1小时前</p>
+                    </div>
+                </div>
+                <div class="feeling-card">
+                    <div class="feeling-avatar" style="background: #D1FAE5;">📖</div>
+                    <div class="feeling-content">
+                        <p class="feeling-text">"插画画得太棒了，每一页都是艺术品"</p>
+                        <p class="feeling-meta">小小艺术家 · 惊艳 · 2小时前</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="my-feeling-input">
+                <textarea class="input-area" placeholder="分享你的一句话感受..."></textarea>
+                <button class="submit-feeling" onclick="alert('感谢分享！你的感受已加入共读空间 ✨')">发布感受</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 页面10: 城市文化地图 ==================== -->
+    <div class="page city-page" id="page-city">
+        <div class="explore-header">
+            <button class="back-btn" onclick="navigateTo('home')">←</button>
+            <h1 class="explore-title">城市文化地图</h1>
+            <p class="explore-subtitle">看见整座城市的阅读脉搏</p>
+        </div>
+
+        <div class="city-stats">
+            <div class="stat-card">
+                <p class="stat-value">1,284</p>
+                <p class="stat-label">今日活跃读者</p>
+            </div>
+            <div class="stat-card">
+                <p class="stat-value">89</p>
+                <p class="stat-label">热门书籍</p>
+            </div>
+            <div class="stat-card">
+                <p class="stat-value">12</p>
+                <p class="stat-label">文化热点</p>
+            </div>
+        </div>
+
+        <div class="city-map">
+            <div class="hotspot" style="left: 25%; top: 30%;" onclick="navigateTo('explore')">
+                <div class="hotspot-ring"></div>
+                <div class="hotspot-dot"></div>
+                <span class="hotspot-label">恐龙探索</span>
+            </div>
+            <div class="hotspot" style="left: 60%; top: 25%;" onclick="navigateTo('ar')">
+                <div class="hotspot-ring"></div>
+                <div class="hotspot-dot" style="background: #F59E0B;"></div>
+                <span class="hotspot-label">榆林历史</span>
+            </div>
+            <div class="hotspot" style="left: 35%; top: 55%;" onclick="navigateTo('explore')">
+                <div class="hotspot-ring"></div>
+                <div class="hotspot-dot" style="background: #10B981;"></div>
+                <span class="hotspot-label">植物世界</span>
+            </div>
+            <div class="hotspot" style="left: 70%; top: 60%;" onclick="navigateTo('explore')">
+                <div class="hotspot-ring"></div>
+                <div class="hotspot-dot" style="background: #EC4899;"></div>
+                <span class="hotspot-label">艺术世界</span>
+            </div>
+            <div class="hotspot" style="left: 20%; top: 72%;" onclick="navigateTo('explore')">
+                <div class="hotspot-ring"></div>
+                <div class="hotspot-dot" style="background: #8B5CF6;"></div>
+                <span class="hotspot-label">非遗文化</span>
+            </div>
+            <div class="hotspot" style="left: 55%; top: 78%;" onclick="navigateTo('explore')">
+                <div class="hotspot-ring"></div>
+                <div class="hotspot-dot" style="background: #3B82F6;"></div>
+                <span class="hotspot-label">宇宙探索</span>
+            </div>
+        </div>
+
+        <div class="trending-section">
+            <p class="section-label">城市热门话题</p>
+            <div class="trending-list">
+                <div class="trending-item" onclick="navigateTo('explore')">
+                    <span class="trending-rank gold">1</span>
+                    <div class="trending-info">
+                        <p class="trending-title">恐龙探索</p>
+                        <p class="trending-readers">256 人正在探索</p>
+                    </div>
+                </div>
+                <div class="trending-item" onclick="navigateTo('ar')">
+                    <span class="trending-rank silver">2</span>
+                    <div class="trending-info">
+                        <p class="trending-title">明代榆林城复原</p>
+                        <p class="trending-readers">189 人正在体验</p>
+                    </div>
+                </div>
+                <div class="trending-item" onclick="navigateTo('explore')">
+                    <span class="trending-rank bronze">3</span>
+                    <div class="trending-info">
+                        <p class="trending-title">植物的睡眠秘密</p>
+                        <p class="trending-readers">147 人正在探索</p>
+                    </div>
+                </div>
+                <div class="trending-item">
+                    <span class="trending-rank" style="background: #9CA3AF;">4</span>
+                    <div class="trending-info">
+                        <p class="trending-title">宇宙黑洞探秘</p>
+                        <p class="trending-readers">128 人正在探索</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 页面11-12: 个人成长页面 ==================== -->
+    <div class="page profile-page" id="page-profile">
+        <div class="profile-header">
+            <div class="avatar-large">🌱</div>
+            <h1 class="profile-name">小小探险家</h1>
+            <span class="profile-level">Lv.7 知识猎人</span>
+        </div>
+
+        <div class="stats-grid">
+            <div class="profile-stat">
+                <p class="profile-stat-value">42</p>
+                <p class="profile-stat-label">已读书籍</p>
+            </div>
+            <div class="profile-stat">
+                <p class="profile-stat-value">128</p>
+                <p class="profile-stat-label">探索时长(h)</p>
+            </div>
+            <div class="profile-stat">
+                <p class="profile-stat-value">15</p>
+                <p class="profile-stat-label">获得徽章</p>
+            </div>
+        </div>
+
+        <div class="journey-section">
+            <p class="section-label">我的探索旅程</p>
+            <div class="journey-timeline">
+                <div class="journey-line"></div>
+
+                <div class="journey-item">
+                    <div class="journey-dot"></div>
+                    <div class="journey-card">
+                        <p class="journey-date">今天</p>
+                        <p class="journey-title">完成了「恐龙探索」主题</p>
+                        <p class="journey-desc">发现了霸王龙的秘密，解锁了"古生物达人"徽章</p>
+                    </div>
+                </div>
+
+                <div class="journey-item">
+                    <div class="journey-dot" style="background: #F59E0B;"></div>
+                    <div class="journey-card">
+                        <p class="journey-date">昨天</p>
+                        <p class="journey-title">在图书馆找到了《神奇的恐龙世界》</p>
+                        <p class="journey-desc">使用导航功能，第一次独立找到目标书籍</p>
+                    </div>
+                </div>
+
+                <div class="journey-item">
+                    <div class="journey-dot" style="background: #10B981;"></div>
+                    <div class="journey-card">
+                        <p class="journey-date">3天前</p>
+                        <p class="journey-title">体验了AR历史沉浸模式</p>
+                        <p class="journey-desc">穿越到了明代榆林，看到了镇北台的模样</p>
+                    </div>
+                </div>
+
+                <div class="journey-item">
+                    <div class="journey-dot" style="background: #EC4899;"></div>
+                    <div class="journey-card">
+                        <p class="journey-date">1周前</p>
+                        <p class="journey-title">发布了第一条阅读感受</p>
+                        <p class="journey-desc">"原来霸王龙的前臂这么短是有原因的！" - 收获了 12 个共鸣</p>
+                    </div>
+                </div>
+
+                <div class="journey-item">
+                    <div class="journey-dot" style="background: #8B5CF6;"></div>
+                    <div class="journey-card">
+                        <p class="journey-date">2周前</p>
+                        <p class="journey-title">开启「植物世界」探索</p>
+                        <p class="journey-desc">好奇心驱使我进入了第一个知识主题空间</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 底部导航栏 ==================== -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="navigateTo('home')" data-nav="home">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">探索</span>
+        </button>
+        <button class="nav-item" onclick="navigateTo('city')" data-nav="city">
+            <span class="nav-icon">🗺️</span>
+            <span class="nav-label">城市</span>
+        </button>
+        <button class="nav-item" onclick="navigateTo('social')" data-nav="social">
+            <span class="nav-icon">💫</span>
+            <span class="nav-label">共读</span>
+        </button>
+        <button class="nav-item" onclick="navigateTo('profile')" data-nav="profile">
+            <span class="nav-icon">🌱</span>
+            <span class="nav-label">我的</span>
+        </button>
+    </nav>
+
+    <!-- ==================== 情绪选择面板 ==================== -->
+    <div class="mood-panel" id="mood-panel">
+        <div class="mood-options">
+            <h2 class="mood-panel-title">你现在感觉怎么样？</h2>
+            <div class="mood-grid">
+                <div class="mood-option selected" data-mood="happy" onclick="setMood('happy')">
+                    <div class="mood-emoji" style="background: #FEF3C7;">😊</div>
+                    <span class="mood-name">开心</span>
+                </div>
+                <div class="mood-option" data-mood="curious" onclick="setMood('curious')">
+                    <div class="mood-emoji" style="background: #D1FAE5;">🤔</div>
+                    <span class="mood-name">好奇</span>
+                </div>
+                <div class="mood-option" data-mood="calm" onclick="setMood('calm')">
+                    <div class="mood-emoji" style="background: #DBEAFE;">😌</div>
+                    <span class="mood-name">平静</span>
+                </div>
+                <div class="mood-option" data-mood="tired" onclick="setMood('tired')">
+                    <div class="mood-emoji" style="background: #F3F4F6;">😴</div>
+                    <span class="mood-name">疲惫</span>
+                </div>
+                <div class="mood-option" data-mood="nostalgic" onclick="setMood('nostalgic')">
+                    <div class="mood-emoji" style="background: #F5F3FF;">🍂</div>
+                    <span class="mood-name">怀旧</span>
+                </div>
+                <div class="mood-option" onclick="closeMoodPanel()">
+                    <div class="mood-emoji" style="background: #FEE2E2;">✕</div>
+                    <span class="mood-name">关闭</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 连续探索提示 ==================== -->
+    <div class="explore-continue" id="explore-continue">
+        <p class="continue-hint">探索线索</p>
+        <p class="continue-question" id="continue-question">你已经发现了恐龙的秘密，接下来想知道"植物如何与昆虫交流"吗？</p>
+        <button class="continue-btn" onclick="navigateTo('explore'); hideExploreContinue();">继续探索 →</button>
+    </div>
+
+</div>
+
+<script>
+    // 页面导航系统
+    let currentPage = 'home';
+    const pages = {
+        home: document.getElementById('page-home'),
+        explore: document.getElementById('page-explore'),
+        books: document.getElementById('page-books'),
+        detail: document.getElementById('page-detail'),
+        navigation: document.getElementById('page-navigation'),
+        ar: document.getElementById('page-ar'),
+        social: document.getElementById('page-social'),
+        city: document.getElementById('page-city'),
+        profile: document.getElementById('page-profile')
+    };
+
+    function navigateTo(page, theme) {
+        // 隐藏当前页面
+        if (pages[currentPage]) {
+            pages[currentPage].classList.remove('active');
+        }
+
+        // 显示目标页面
+        setTimeout(() => {
+            if (pages[page]) {
+                pages[page].classList.add('active');
+                currentPage = page;
+
+                // 更新底部导航状态
+                updateNavState(page);
+
+                // 根据主题更新内容
+                if (theme && page === 'explore') {
+                    updateExploreContent(theme);
+                }
+
+                // 滚动到顶部
+                pages[page].scrollTop = 0;
+            }
+        }, 100);
+    }
+
+    function updateNavState(page) {
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+            if (item.dataset.nav === page) {
+                item.classList.add('active');
+            }
+        });
+    }
+
+    // 更新探索页面内容
+    const themeData = {
+        dinosaur: {
+            title: '恐龙探索',
+            subtitle: '走进史前世界，发现生命的奥秘',
+            question: '霸王龙为什么拥有如此强大的咬合力？'
+        },
+        plant: {
+            title: '植物世界',
+            subtitle: '每一株植物都是一个奇迹',
+            question: '植物为什么会睡觉？它们有梦吗？'
+        },
+        space: {
+            title: '宇宙探索',
+            subtitle: '仰望星空，探索无限',
+            question: '黑洞的另一边是什么？'
+        },
+        heritage: {
+            title: '非遗文化',
+            subtitle: '传承千年的匠心与智慧',
+            question: '这些技艺是如何流传至今的？'
+        },
+        art: {
+            title: '艺术世界',
+            subtitle: '用色彩和形状表达情感',
+            question: '色彩如何诉说情感？'
+        },
+        yulin: {
+            title: '榆林历史',
+            subtitle: '穿越时空，遇见古老的榆林',
+            question: '100年前的榆林是什么样子？'
+        }
+    };
+
+    function updateExploreContent(theme) {
+        const data = themeData[theme] || themeData.dinosaur;
+        document.getElementById('explore-title').textContent = data.title;
+        document.getElementById('explore-subtitle').textContent = data.subtitle;
+        document.getElementById('scene-question').textContent = data.question;
+        document.getElementById('books-title').textContent = data.title + '相关书籍';
+    }
+
+    // 情绪系统
+    function toggleMoodPanel() {
+        document.getElementById('mood-panel').classList.add('show');
+    }
+
+    function closeMoodPanel() {
+        document.getElementById('mood-panel').classList.remove('show');
+    }
+
+    function setMood(mood) {
+        document.querySelector('.app-container').setAttribute('data-mood', mood);
+
+        // 更新选中状态
+        document.querySelectorAll('.mood-option').forEach(opt => {
+            opt.classList.remove('selected');
+            if (opt.dataset.mood === mood) {
+                opt.classList.add('selected');
+            }
+        });
+
+        // 更新情绪图标
+        const moodEmojis = {
+            happy: '😊',
+            curious: '🤔',
+            calm: '😌',
+            tired: '😴',
+            nostalgic: '🍂'
+        };
+        document.querySelector('.mood-selector').textContent = moodEmojis[mood];
+
+        closeMoodPanel();
+    }
+
+    // 点击面板外部关闭
+    document.getElementById('mood-panel').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeMoodPanel();
+        }
+    });
+
+    // 连续探索提示
+    function showExploreContinue() {
+        document.getElementById('explore-continue').classList.add('show');
+
+        // 根据当前页面生成不同的提示
+        const questions = [
+            '你已经发现了恐龙的秘密，接下来想知道"植物如何与昆虫交流"吗？',
+            '如果你对这本书感兴趣，还有3本相关书籍等待探索。',
+            '探索完这个主题后，要不要去看看其他小朋友在读什么？',
+            '你已经完成了一次探索！准备好下一次冒险了吗？'
+        ];
+        document.getElementById('continue-question').textContent =
+            questions[Math.floor(Math.random() * questions.length)];
+    }
+
+    function hideExploreContinue() {
+        document.getElementById('explore-continue').classList.remove('show');
+    }
+
+    // AR 时间轴交互
+    function selectEra(element, era) {
+        document.querySelectorAll('.timeline-era').forEach(e => e.classList.remove('active'));
+        element.classList.add('active');
+        element.style.color = 'white';
+        element.style.background = 'rgba(255,255,255,0.15)';
+
+        // 更新进度条
+        const progressMap = { '秦': '10%', '唐': '25%', '明': '35%', '清': '60%', 'modern': '85%' };
+        document.getElementById('timeline-progress').style.width = progressMap[era] || '35%';
+
+        // 更新场景信息
+        const eraData = {
+            '秦': { badge: '秦代', title: '上郡治所', desc: '秦始皇统一六国后，在此设上郡，榆林地区首次纳入中央管辖。' },
+            '唐': { badge: '唐代', title: '胜州榆林', desc: '唐代榆林已是丝绸之路上的重要驿站，商旅云集。' },
+            '明': { badge: '明代', title: '镇北台 · 万里长城第一台', desc: '建于明万历三十五年（1607年），是明长城沿线最大的军事瞭望台之一。' },
+            '清': { badge: '清代', title: '榆阳古城', desc: '清代榆林城池完备，成为陕北地区的政治经济中心。' },
+            'modern': { badge: '近现代', title: '革命圣地', desc: '抗日战争时期，榆林成为重要的革命根据地之一。' }
+        };
+
+        const data = eraData[era];
+        document.querySelector('.ar-era-badge').textContent = data.badge;
+        document.querySelector('.ar-scene-title').textContent = data.title;
+        document.querySelector('.ar-scene-desc').textContent = data.desc;
+
+        // 重置其他era样式
+        document.querySelectorAll('.timeline-era').forEach(e => {
+            if (!e.classList.contains('active')) {
+                e.style.color = '';
+                e.style.background = '';
+            }
+        });
+    }
+
+    // 卡片点击动画增强
+    document.querySelectorAll('.theme-card, .path-card, .book-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            this.style.transform = 'scale(0.96)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+    });
+
+    // 初始化
+    console.log('🌟 智慧图书馆探索APP 已加载');
+    console.log('📖 开始你的探索之旅吧！');
+</script>
+</body>
+</html>
